@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
-export async function PUT(request: Request, { params }: { params: { id: string; }; }) {
+type RouteParams = Promise<{ id: string; }>;
+
+
+export async function PUT(request: Request, { params }: { params: RouteParams; }) {
+
+  const resolvedParams = await params;
+
   const { name, email, password } = await request.json();
   const updateData: { name?: string; email?: string; password?: string; } = {};
 
@@ -20,7 +26,7 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: updateData,
     });
 
@@ -42,10 +48,12 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
   }
 }
 
-export async function GET(request: Request, { params }: { params: { id: string; }; }) {
+export async function GET(request: Request, { params }: { params: RouteParams; }) {
   try {
+    const resolvedParams = await params;
+
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       select: {
         id: true,
         name: true,

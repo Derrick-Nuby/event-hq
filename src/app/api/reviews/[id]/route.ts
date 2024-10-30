@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request, { params }: { params: { id: string; }; }) {
+type Params = Promise<{ id: string; }>;
+
+// Get review details
+export async function GET(request: Request, { params }: { params: Params; }) {
+  const resolvedParams = await params;
   const review = await prisma.review.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     include: {
       user: {
         select: {
@@ -15,22 +19,32 @@ export async function GET(request: Request, { params }: { params: { id: string; 
       event: true,
     },
   });
+
   if (!review) {
     return NextResponse.json({ success: false, message: 'Review not found' }, { status: 404 });
   }
+
   return NextResponse.json({ success: true, data: review });
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string; }; }) {
+// Update review
+export async function PUT(request: Request, { params }: { params: Params; }) {
+  const resolvedParams = await params;
   const { rating, comment } = await request.json();
+
   const updatedReview = await prisma.review.update({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     data: { rating, comment },
   });
+
   return NextResponse.json({ success: true, data: updatedReview });
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string; }; }) {
-  await prisma.review.delete({ where: { id: params.id } });
+// Delete review
+export async function DELETE(request: Request, { params }: { params: Params; }) {
+  const resolvedParams = await params;
+
+  await prisma.review.delete({ where: { id: resolvedParams.id } });
+
   return NextResponse.json({ success: true, message: 'Review deleted' });
 }

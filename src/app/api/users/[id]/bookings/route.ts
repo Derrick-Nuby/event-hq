@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request, { params }: { params: { id: string; }; }) {
+type RouteParams = Promise<{ id: string; }>;
+
+export async function GET(request: Request, { params }: { params: RouteParams; }) {
   try {
+    const resolvedParams = await params;
     const booking = await prisma.booking.findMany({
-      where: { userId: params.id },
+      where: { userId: resolvedParams.id },
       include: {
         // event: true,
       },
