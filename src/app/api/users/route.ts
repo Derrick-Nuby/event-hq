@@ -5,11 +5,32 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 import { createToken } from '@/utils/jwt';
 
+export async function GET() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+    return NextResponse.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return NextResponse.json(
+      { success: false, message: 'Error fetching users' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
 
   try {
+
     const userExists = await prisma.user.findUnique({ where: { email } });
+
     if (userExists) {
       return NextResponse.json({
         success: false,
@@ -43,9 +64,11 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+
   const { email, password } = await req.json();
 
   try {
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
