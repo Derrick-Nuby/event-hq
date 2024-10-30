@@ -19,6 +19,15 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string; }; }) {
-  await prisma.category.delete({ where: { id: params.id } });
-  return NextResponse.json({ success: true, message: 'Category deleted' });
+  try {
+    await prisma.category.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true, message: 'Category deleted' });
+  } catch (error) {
+    console.error('Failed', error);
+    return NextResponse.json({
+      success: false,
+      message: 'Error',
+      error
+    }, { status: 500 });
+  }
 }

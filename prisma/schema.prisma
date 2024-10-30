@@ -18,6 +18,7 @@ model User {
   events    Event[]   @relation("EventCreator")
   bookings  Booking[]
   reviews   Review[]
+  password  String
 }
 
 model Event {
