@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  venueId: string;
+  categoryId: string;
+  price: number;
+  status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
+}
+
 // Event Schema
 export const eventSchema = z.object({
   title: z.string().min(4, 'Title must be at least 4 characters'),

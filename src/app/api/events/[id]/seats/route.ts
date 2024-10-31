@@ -12,6 +12,7 @@ export async function GET(
   const seats = await prisma.seat.findMany({
     where: {
       eventId: resolvedParams.id,
+      status: 'AVAILABLE',
     },
     orderBy: {
       number: 'asc'
