@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "image" DROP DEFAULT;
+
+-- AlterTable
+ALTER TABLE "Venue" ALTER COLUMN "image" DROP DEFAULT;
