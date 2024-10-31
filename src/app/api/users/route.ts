@@ -87,12 +87,12 @@ export async function PUT(req: Request) {
       }, { status: 401 });
     }
 
-    const token = createToken({ userId: user.id, email: user.email });
+    const token = createToken({ userId: user.id, email: user.email, role: user.role });
 
     return NextResponse.json({
       success: true,
       message: 'Login successful',
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
       token
     });
 

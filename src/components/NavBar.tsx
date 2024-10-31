@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -11,48 +13,60 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from 'lucide-react';
+import ModeToggle from './global/ModeToggle';
+import { useUser } from '@/context/UserContext';
+import toast from 'react-hot-toast';
 
 // Simulating logged in state
-const isLoggedIn = true;
-const isAdmin = false;
 export default function NavBar() {
+
+  const { isAdmin, isLoggedIn, user, logout } = useUser();
+
+  const handleSignOut = () => {
+    try {
+      logout();
+      toast.success("Signed out successfully");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error("Failed to sign out. Please try again.");
+    }
+  };
+
   return (
-    <header className="bg-background border-b">
+    <header className="bg-background border-b md:px-10">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              EventMaster
+          <Link href="/" className="text-2xl font-bold text-primary">
+            EventHQ
+          </Link>
+          <nav className="hidden md:flex space-x-4">
+            <Link href="/" className="text-foreground hover:text-primary">
+              Home
             </Link>
-            <nav className="hidden md:flex space-x-4">
-              <Link href="/" className="text-foreground hover:text-primary">
-                Home
-              </Link>
-              <Link href="/events" className="text-foreground hover:text-primary">
-                Events
-              </Link>
-              <Link href="/categories" className="text-foreground hover:text-primary">
-                Categories
-              </Link>
-              <Link href="/venues" className="text-foreground hover:text-primary">
-                Venues
-              </Link>
-            </nav>
-          </div>
+            <Link href="/events" className="text-foreground hover:text-primary">
+              Events
+            </Link>
+            <Link href="/categories" className="text-foreground hover:text-primary">
+              Categories
+            </Link>
+            <Link href="/venues" className="text-foreground hover:text-primary">
+              Venues
+            </Link>
+          </nav>
+          <form className="hidden md:flex">
+            <Input
+              type="search"
+              placeholder="Search events..."
+              className="w-[200px] lg:w-[300px]"
+            />
+          </form>
           <div className="flex items-center space-x-4">
-            <form className="hidden md:flex">
-              <Input
-                type="search"
-                placeholder="Search events..."
-                className="w-[200px] lg:w-[300px]"
-              />
-            </form>
-            {!isLoggedIn ? (
+            {!isLoggedIn() ? (
               <div className="space-x-2">
                 <Button variant="outline">Login</Button>
                 <Button>Register</Button>
               </div>
-            ) : isAdmin ? (
+            ) : isAdmin() ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">Admin Menu</Button>
@@ -81,7 +95,7 @@ export default function NavBar() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">
                     <User className="mr-2 h-4 w-4" />
-                    John Doe
+                    {user?.name}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
@@ -97,10 +111,11 @@ export default function NavBar() {
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut} className='cursor-pointer'>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
+            <ModeToggle />
           </div>
         </div>
       </div>
