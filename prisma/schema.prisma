@@ -40,6 +40,7 @@ model Event {
   reviews     Review[]
   status      EventStatus @default(DRAFT)
   price       Decimal
+  image       String
 
   @@index([userId])
   @@index([venueId])
@@ -88,6 +89,9 @@ model Venue {
   address     String
   capacity    Int
   events      Event[]
+  image       String
+  // details     String
+  // location     String
 }
 
 model Review {
