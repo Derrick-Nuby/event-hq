@@ -90,6 +90,8 @@ model Venue {
   capacity    Int
   events      Event[]
   image       String
+  // details     String
+  // location     String
 }
 
 model Review {

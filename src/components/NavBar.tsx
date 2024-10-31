@@ -14,7 +14,7 @@ import { User } from 'lucide-react';
 
 // Simulating logged in state
 const isLoggedIn = true;
-const isAdmin = true;
+const isAdmin = false;
 export default function NavBar() {
   return (
     <header className="bg-background border-b">

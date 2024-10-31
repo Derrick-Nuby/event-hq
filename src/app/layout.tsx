@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import Container from "./Container";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +35,9 @@ export default function RootLayout({
       >
         <Providers>
           <NavBar />
-          {children}
+          <Container className="py-10">
+            {children}
+          </Container>
           <Footer />
         </Providers>
       </body>
