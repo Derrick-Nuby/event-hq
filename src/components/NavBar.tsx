@@ -46,9 +46,6 @@ export default function NavBar() {
             <Link href="/events" className="text-foreground hover:text-primary">
               Events
             </Link>
-            <Link href="/categories" className="text-foreground hover:text-primary">
-              Categories
-            </Link>
             <Link href="/venues" className="text-foreground hover:text-primary">
               Venues
             </Link>
