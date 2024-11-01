@@ -26,8 +26,8 @@ export default function SignupForm() {
 
   const mutation = useMutation({
     mutationFn: createUser,
-    onSuccess: (data) => {
-      toast.success(data.message);
+    onSuccess: () => {
+      toast.success('sign up successfully');
       router.push("/login");
     },
     onError: (error: Error) => {
