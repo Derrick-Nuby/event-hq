@@ -15,7 +15,17 @@ export const loginUser = async (credentials: LoginFormData) => {
 export const createUser = async (credentials: SignupFormData) => {
   try {
     const response = await axiosInstance.post('/api/users', credentials);
-    return response.data;
+    return response.data.data;
+  } catch (error) {
+    const errorMessage = handleAxiosError(error);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getSingleUser = async (userID: string) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/${userID}`);
+    return response.data.data;
   } catch (error) {
     const errorMessage = handleAxiosError(error);
     throw new Error(errorMessage);
