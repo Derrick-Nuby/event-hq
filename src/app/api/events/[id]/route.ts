@@ -9,10 +9,9 @@ export async function GET(request: NextRequest, { params }: { params: Params; })
   const event = await prisma.event.findUnique({
     where: { id: resolvedParams.id },
     include: {
-      createdBy: {
+      venue: {
         select: {
           id: true,
-          email: true,
           name: true,
         },
       },

@@ -2,36 +2,80 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, MapPinIcon, Clock, Users, Music, Share2Icon } from 'lucide-react';
+import { CalendarIcon, MapPinIcon, Clock, Users, Share2Icon } from 'lucide-react';
 
 interface EventDetailsProps {
   eventDetails: {
-    imageSrc: string;
-    imageAlt: string;
+    id: string;
     title: string;
-    dateRange: string;
-    location: string;
-    startTime: string;
-    endTime: string;
-    attendees: number;
     description: string;
-    highlights: string[];
-    lineup: string[];
-    tickets: { type: string; price: string; }[];
-    genres: string;
-    ageRestriction: string;
-  };
+    startDate: string;
+    endDate: string;
+    price: string;
+    image: string;
+    venue: {
+      name: string;
+    };
+  } | null;
+  isLoading: boolean;
+  onBookClick: () => void;
 }
 
-const EventDetails: React.FC<EventDetailsProps> = ({ eventDetails }) => {
+const EventDetails: React.FC<EventDetailsProps> = ({ eventDetails, isLoading, onBookClick }) => {
+  if (isLoading) {
+    // Skeleton Loading State
+    return (
+      <div className="container mx-auto px-4 py-8 animate-pulse">
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <div className="w-full h-[400px] bg-gray-300 rounded-lg" />
+            <div className="h-8 bg-gray-300 rounded-md mt-6 mb-4 w-3/4" />
+            <div className="flex flex-wrap gap-4 mb-6">
+              <div className="h-6 bg-gray-300 rounded-full w-32" />
+              <div className="h-6 bg-gray-300 rounded-full w-32" />
+              <div className="h-6 bg-gray-300 rounded-full w-48" />
+            </div>
+            <div className="h-32 bg-gray-300 rounded-md mt-4" />
+          </div>
+          <div>
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-8 bg-gray-300 rounded-md mb-4 w-1/2" />
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-300 rounded-md w-full" />
+                  <div className="h-6 bg-gray-300 rounded-md w-full" />
+                </div>
+                <div className="h-10 bg-gray-300 rounded-md mt-6" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!eventDetails) {
+    return <div>No event details available</div>;
+  }
+
+  const {
+    title,
+    description,
+    startDate,
+    endDate,
+    price,
+    image,
+    venue,
+  } = eventDetails;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
           <div className="relative">
             <Image
-              src={eventDetails.imageSrc}
-              alt={eventDetails.imageAlt}
+              src={image}
+              alt={title}
               width={1000}
               height={500}
               className="w-full h-[400px] object-cover rounded-lg"
@@ -41,39 +85,27 @@ const EventDetails: React.FC<EventDetailsProps> = ({ eventDetails }) => {
               Share
             </Button>
           </div>
-          <h1 className="text-3xl font-bold mt-6 mb-4">{eventDetails.title}</h1>
+          <h1 className="text-3xl font-bold mt-6 mb-4">{title}</h1>
           <div className="flex flex-wrap gap-4 mb-6">
             <Badge variant="secondary" className="flex items-center">
               <CalendarIcon className="h-4 w-4 mr-1" />
-              {eventDetails.dateRange}
+              {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}
             </Badge>
             <Badge variant="secondary" className="flex items-center">
               <MapPinIcon className="h-4 w-4 mr-1" />
-              {eventDetails.location}
+              {venue.name}
             </Badge>
             <Badge variant="secondary" className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
-              Gates open at {eventDetails.startTime}
+              Starts at {new Date(startDate).toLocaleTimeString()}
             </Badge>
             <Badge variant="secondary" className="flex items-center">
               <Users className="h-4 w-4 mr-1" />
-              {eventDetails.attendees.toLocaleString()} attendees
+              100,000 seats
             </Badge>
           </div>
           <div className="prose max-w-none">
-            <p>{eventDetails.description}</p>
-            <h2>Event Highlights</h2>
-            <ul>
-              {eventDetails.highlights.map((highlight, index) => (
-                <li key={index}>{highlight}</li>
-              ))}
-            </ul>
-            <h2>Lineup Sneak Peek</h2>
-            <ul>
-              {eventDetails.lineup.map((artist, index) => (
-                <li key={index}>{artist}</li>
-              ))}
-            </ul>
+            <p>{description}</p>
           </div>
         </div>
         <div>
@@ -81,14 +113,12 @@ const EventDetails: React.FC<EventDetailsProps> = ({ eventDetails }) => {
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold mb-4">Ticket Information</h2>
               <div className="space-y-4">
-                {eventDetails.tickets.map((ticket, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <span className="font-semibold">{ticket.type}</span>
-                    <span className="text-xl font-bold">{ticket.price}</span>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Standard Ticket</span>
+                  <span className="text-xl font-bold">{Number(price).toLocaleString()} RWF</span>
+                </div>
               </div>
-              <Button className="w-full mt-6">Book Tickets</Button>
+              <Button className="w-full mt-6" onClick={onBookClick}>Book Tickets</Button>
             </CardContent>
           </Card>
           <Card className="mt-6">
@@ -99,28 +129,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ eventDetails }) => {
                   <Clock className="h-5 w-5 mr-2" />
                   <div>
                     <p className="font-semibold">Start Time</p>
-                    <p>{eventDetails.startTime}</p>
+                    <p>{new Date(startDate).toLocaleTimeString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 mr-2" />
                   <div>
                     <p className="font-semibold">End Time</p>
-                    <p>{eventDetails.endTime}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Music className="h-5 w-5 mr-2" />
-                  <div>
-                    <p className="font-semibold">Music Genres</p>
-                    <p>{eventDetails.genres}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  <div>
-                    <p className="font-semibold">Age Restriction</p>
-                    <p>{eventDetails.ageRestriction}</p>
+                    <p>{new Date(endDate).toLocaleTimeString()}</p>
                   </div>
                 </div>
               </div>

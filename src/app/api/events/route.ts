@@ -5,15 +5,10 @@ import { Prisma } from '@prisma/client';
 
 export async function GET() {
   const events = await prisma.event.findMany({
-    where: { status: 'PUBLISHED' },
     include: {
-      // venue: true,
-      // category: true,
-      // seats: true,
-      createdBy: {
+      venue: {
         select: {
           id: true,
-          email: true,
           name: true,
         },
       },

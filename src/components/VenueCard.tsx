@@ -12,7 +12,7 @@ type VenueCardProps = {
     address: string;
     capacity: number;
     image: string;
-  };
+  } | null; // Allow null for loading state
   isLoading?: boolean;
 };
 
@@ -39,8 +39,8 @@ const VenueCard: React.FC<VenueCardProps> = ({ venueDetails, isLoading = false }
     <Card className="w-full max-w-sm overflow-hidden">
       <div className="relative">
         <Image
-          src={venueDetails.image}
-          alt={venueDetails.name}
+          src={venueDetails?.image ?? '/placeholder-image.jpg'} // Use a placeholder image if none is provided
+          alt={venueDetails?.name ?? 'Venue Image'}
           width={300}
           height={200}
           className="w-full h-48 object-cover"
@@ -53,19 +53,19 @@ const VenueCard: React.FC<VenueCardProps> = ({ venueDetails, isLoading = false }
         </div>
         <div className="absolute bottom-2 right-2">
           <Button asChild size="sm" variant="secondary">
-            <Link href={`/venues/${venueDetails.id}`}>View Details</Link>
+            <Link href={`/venues/${venueDetails?.id}`}>View Details</Link>
           </Button>
         </div>
       </div>
       <CardContent className="p-4">
-        <h3 className="text-lg font-semibold mb-2">{venueDetails.name}</h3>
+        <h3 className="text-lg font-semibold mb-2">{venueDetails?.name ?? 'Venue Name'}</h3>
         <div className="flex items-center text-sm text-muted-foreground mb-1">
           <MapPinIcon className="h-4 w-4 mr-1" />
-          {venueDetails.address}
+          {venueDetails?.address ?? 'Venue Address'}
         </div>
         <div className="flex items-center text-sm text-muted-foreground mb-1">
           <Armchair className="h-4 w-4 mr-1" />
-          {venueDetails.capacity} Capacity
+          {venueDetails?.capacity ?? 100000} Capacity
         </div>
       </CardContent>
     </Card>

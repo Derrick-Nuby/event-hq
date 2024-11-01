@@ -1,81 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from 'lucide-react';
-import Cookies from 'js-cookie';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { LoginFormData, loginSchema } from '@/types';
+import toast from 'react-hot-toast';
+import { loginUser } from '@/lib/users';
+import { useMutation } from "@tanstack/react-query";
+import { useUser } from '@/context/UserContext';
+import { useRouter } from 'next/navigation';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams?.get('registered') === 'true') {
-      setSuccessMessage('Account created successfully! Please log in.');
-    }
-  }, [searchParams]);
+  const { setUser, setToken, setRole } = useUser();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      const { user, token } = data;
+      setUser(user);
+      setToken(token);
+      setRole(user.role);
+      toast.success(data.message);
+      router.push("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
 
-    try {
-      const response = await fetch('/api/users', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to login');
-      }
-
-      // Save auth data
-      Cookies.set('token', result.token, { expires: 7 });
-      localStorage.setItem('user', JSON.stringify(result.user));
-
-      // Redirect based on role (assuming role is included in user data)
-      if (result.user.role === 'ADMIN') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid credentials');
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: LoginFormData) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -89,11 +58,6 @@ export default function LoginForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {successMessage && (
-              <Alert className="mb-4">
-                <AlertDescription>{successMessage}</AlertDescription>
-              </Alert>
-            )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -118,13 +82,8 @@ export default function LoginForm() {
                   <p className="text-sm text-red-500">{errors.password.message}</p>
                 )}
               </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Signing in...

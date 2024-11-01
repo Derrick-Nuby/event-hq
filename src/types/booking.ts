@@ -8,4 +8,4 @@ export const bookingSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED']).default('PENDING'),
 });
 
-export type BookingForm = z.infer<typeof bookingSchema>;
+export type BookingFormData = z.infer<typeof bookingSchema>;

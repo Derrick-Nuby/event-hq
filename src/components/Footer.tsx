@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 
 export default function Footer() {
   return (
-    <footer className="bg-background border-t">
+    <footer className="bg-background border-t md:px-14">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -14,16 +14,15 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/" className="text-foreground hover:text-primary">Home</Link></li>
               <li><Link href="/events" className="text-foreground hover:text-primary">Events</Link></li>
-              <li><Link href="/categories" className="text-foreground hover:text-primary">Categories</Link></li>
               <li><Link href="/venues" className="text-foreground hover:text-primary">Venues</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">Contact Us</h3>
-            <p>123 Event Street</p>
-            <p>Eventville, EV 12345</p>
-            <p>Phone: (123) 456-7890</p>
-            <p>Email: info@eventmaster.com</p>
+            <p>Gasabo - Gacuriro</p>
+            <p>Rwanda - Kigali</p>
+            <p>Phone: 078 626 3290</p>
+            <p>Email: info@EventHQ.com</p>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">Follow Us</h3>
@@ -48,7 +47,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          © 2023 EventMaster. All rights reserved.
+          © 2023 EventHQ. All rights reserved.
         </div>
       </div>
     </footer>

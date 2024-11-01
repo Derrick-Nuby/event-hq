@@ -47,32 +47,33 @@ model Event {
   @@index([categoryId])
 }
 
-model Seat {
-  id        String    @id @default(cuid())
-  number    String
-  type      SeatType  @default(REGULAR)
-  price     Decimal
-  status    SeatStatus @default(AVAILABLE)
-  event     Event     @relation(fields: [eventId], references: [id])
-  eventId   String
-  booking   Booking?
-
-  @@index([eventId])
-}
-
 model Booking {
-  id        String    @id @default(cuid())
-  user      User      @relation(fields: [userId], references: [id])
+  id        String        @id @default(cuid())
+  user      User         @relation(fields: [userId], references: [id])
   userId    String
-  event     Event     @relation(fields: [eventId], references: [id])
+  event     Event        @relation(fields: [eventId], references: [id])
   eventId   String
-  seat      Seat      @relation(fields: [seatId], references: [id])
-  seatId    String    @unique
+  seat      Seat         @relation(fields: [seatId], references: [id])
+  seatId    String
   status    BookingStatus @default(PENDING)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@index([userId])
+  @@index([eventId])
+  @@index([seatId])
+}
+
+model Seat {
+  id       String     @id @default(cuid())
+  number   String
+  type     SeatType   @default(REGULAR)
+  price    Decimal
+  status   SeatStatus @default(AVAILABLE)
+  event    Event      @relation(fields: [eventId], references: [id])
+  eventId  String
+  bookings Booking[]
+
   @@index([eventId])
 }
 
