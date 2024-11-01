@@ -63,7 +63,7 @@ export default function NavBar() {
                 <Link href={'/login'}>
                   <Button variant="outline">Login</Button>
                 </Link>
-                <Link href={'/signup'}>
+                <Link href={'/login'}>
                   <Button>Register</Button>
                 </Link>
               </div>
@@ -102,9 +102,6 @@ export default function NavBar() {
                 <DropdownMenuContent className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link href="/bookings">My Bookings</Link>
                   </DropdownMenuItem>
