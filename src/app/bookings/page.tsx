@@ -84,14 +84,9 @@ export default function UserBookingsTable() {
         header: 'Status',
         Cell: ({ cell }) => {
           const status = cell.getValue<string>();
-          const statusVariants = {
-            'CONFIRMED': 'default',
-            'PENDING': 'outline',
-            'CANCELLED': 'destructive'
-          };
           return (
             <Badge
-              variant={statusVariants[status] || 'default'}
+              variant={'default'}
             >
               {status}
             </Badge>
