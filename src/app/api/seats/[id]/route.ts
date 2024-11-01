@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: { params: RouteParams; }) {
       },
       include: {
         event: true,
-        booking: true,
+        bookings: true,
       },
     });
 
