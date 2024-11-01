@@ -1,19 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectGroup } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectGroup, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { BookingFormData } from '@/types';
 import { useUser } from '@/context/UserContext';
-import { Event as PrismaEvent } from '@prisma/client';
+import { Event as PrismaEvent, Seat, BookingStatus } from '@prisma/client';
 import { getEventSeats } from '@/lib/bookings';
 import { useQuery } from '@tanstack/react-query';
 import { createBooking } from '@/lib/bookings';
+
+interface BookingFormData {
+  seatId: string;
+  status: BookingStatus;
+}
 
 interface BookingFormProps {
   eventDetails: PrismaEvent | null;
@@ -21,7 +25,14 @@ interface BookingFormProps {
 
 const BookingForm: React.FC<BookingFormProps> = ({ eventDetails }) => {
   const { user } = useUser();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<BookingFormData>();
+  const [selectedSeat, setSelectedSeat] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<BookingStatus>('PENDING');
+
+  const { handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<BookingFormData>({
+    defaultValues: {
+      status: 'PENDING',
+    }
+  });
 
   const {
     data: availableSeats,
@@ -30,20 +41,28 @@ const BookingForm: React.FC<BookingFormProps> = ({ eventDetails }) => {
   } = useQuery({
     queryKey: ['availableSeats', eventDetails?.id],
     queryFn: () => getEventSeats(eventDetails?.id || ''),
-    enabled: !!eventDetails?.id // Fetch only if eventDetails is available
+    enabled: !!eventDetails?.id
   });
 
   const onSubmit = async (data: BookingFormData) => {
-    // Add userId and eventId to the booking data
+    if (!user?.id || !eventDetails?.id) {
+      toast.error('User or event information is missing');
+      return;
+    }
+
     const bookingData = {
       ...data,
-      userId: user?.id,               // Automatically include user ID
-      eventId: eventDetails?.id,      // Automatically include event ID
+      userId: user.id,
+      eventId: eventDetails.id,
     };
 
     try {
       await createBooking(bookingData);
       toast.success('Booking submitted successfully!');
+      // Reset form
+      setSelectedSeat('');
+      setSelectedStatus('PENDING');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Failed to submit booking.');
     }
@@ -52,10 +71,21 @@ const BookingForm: React.FC<BookingFormProps> = ({ eventDetails }) => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-red-500">Error loading events: {error.message}</div>
+        <div className="text-red-500">Error loading seats: {error instanceof Error ? error.message : 'Unknown error occurred'}</div>
       </div>
     );
   }
+
+  const handleSeatChange = (value: string) => {
+    setSelectedSeat(value);
+    setValue('seatId', value);
+  };
+
+  const handleStatusChange = (value: string) => {
+    const status = value as BookingStatus;
+    setSelectedStatus(status);
+    setValue('status', status);
+  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
@@ -72,20 +102,25 @@ const BookingForm: React.FC<BookingFormProps> = ({ eventDetails }) => {
               {/* Seat Selection */}
               <div className="space-y-2">
                 <Label htmlFor="seatId">Select Seat</Label>
-                <Select onValueChange={(value) => setValue('seatId', value)}>
+                <Select
+                  value={selectedSeat || undefined}
+                  onValueChange={handleSeatChange}
+                >
                   <SelectTrigger>
-                    <span>Select Seat</span>
+                    <SelectValue placeholder="Select a seat" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {isLoading ? (
-                        <SelectItem disabled>Loading seats...</SelectItem>
-                      ) : (
-                        availableSeats?.map(seat => (
+                        <SelectItem value="loading">Loading seats...</SelectItem>
+                      ) : availableSeats && availableSeats.length > 0 ? (
+                        availableSeats.map((seat: Seat) => (
                           <SelectItem key={seat.id} value={seat.id}>
                             {seat.number} - {seat.status}
                           </SelectItem>
                         ))
+                      ) : (
+                        <SelectItem value="no-seats">No seats available</SelectItem>
                       )}
                     </SelectGroup>
                   </SelectContent>
@@ -98,21 +133,31 @@ const BookingForm: React.FC<BookingFormProps> = ({ eventDetails }) => {
               {/* Booking Status */}
               <div className="space-y-2">
                 <Label htmlFor="status">Booking Status</Label>
-                <Select onValueChange={(value) => setValue('status', value)}>
+                <Select
+                  value={selectedStatus || 'PENDING'}
+                  onValueChange={handleStatusChange}
+                >
                   <SelectTrigger>
-                    <span>Select Status</span>
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value='PENDING'>Pending</SelectItem>
-                      <SelectItem value='CONFIRMED'>Confirmed</SelectItem>
-                      <SelectItem value='CANCELLED'>Cancelled</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errors.status && (
+                  <p className="text-sm text-red-500">{errors.status.message}</p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || !selectedSeat}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

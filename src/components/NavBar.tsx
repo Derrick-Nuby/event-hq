@@ -60,8 +60,12 @@ export default function NavBar() {
           <div className="flex items-center space-x-4">
             {!isLoggedIn() ? (
               <div className="space-x-2">
-                <Button variant="outline">Login</Button>
-                <Button>Register</Button>
+                <Link href={'/login'}>
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link href={'/signup'}>
+                  <Button>Register</Button>
+                </Link>
               </div>
             ) : isAdmin() ? (
               <DropdownMenu>
