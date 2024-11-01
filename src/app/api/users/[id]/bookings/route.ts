@@ -9,7 +9,8 @@ export async function GET(request: Request, { params }: { params: RouteParams; }
     const booking = await prisma.booking.findMany({
       where: { userId: resolvedParams.id },
       include: {
-        // event: true,
+        event: true,
+        seat: true,
       },
     });
 

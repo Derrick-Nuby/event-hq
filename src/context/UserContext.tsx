@@ -14,6 +14,7 @@ interface UserContextType {
   logout: () => void;
   isLoggedIn: () => boolean;
   isAdmin: () => boolean;
+  isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,20 +23,38 @@ export function UserProvider({ children }: { children: React.ReactNode; }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Retrieve data from localStorage on mount
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    const storedRole = localStorage.getItem('role');
+    const initializeUserData = async () => {
+      try {
+        // Retrieve data from localStorage and cookies
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        const storedRole = localStorage.getItem('role');
+        const cookieToken = Cookies.get('jwt');
 
-    if (storedUser) setUser(JSON.parse(storedUser));
-    if (storedToken) setToken(storedToken);
-    if (storedRole) setRole(storedRole);
+        // Set the data in state
+        if (storedUser) setUser(JSON.parse(storedUser));
+        if (storedToken) setToken(storedToken);
+        if (storedRole) setRole(storedRole);
+        if (cookieToken && !storedToken) setToken(cookieToken);
 
-    // Retrieve token from cookies if exists
-    const cookieToken = Cookies.get('jwt');
-    if (cookieToken && !storedToken) setToken(cookieToken);
+      } catch (error) {
+        // Handle any JSON parsing errors
+        console.error('Error initializing user data:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        Cookies.remove('jwt');
+      } finally {
+        // Set loading to false regardless of outcome
+        setIsLoading(false);
+      }
+    };
+
+    initializeUserData();
   }, []);
 
   const setUserData = (userData: User | null) => {
@@ -96,7 +115,8 @@ export function UserProvider({ children }: { children: React.ReactNode; }) {
       setRole: setRoleData,
       logout,
       isLoggedIn,
-      isAdmin
+      isAdmin,
+      isLoading
     }}>
       {children}
     </UserContext.Provider>

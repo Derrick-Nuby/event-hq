@@ -31,3 +31,14 @@ export const getSingleUser = async (userID: string) => {
     throw new Error(errorMessage);
   }
 };
+
+export const getUserBookings = async (userID: string) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/${userID}/bookings`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    const errorMessage = handleAxiosError(error);
+    throw new Error(errorMessage);
+  }
+};
