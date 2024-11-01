@@ -18,10 +18,18 @@ export const eventSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   startDate: z.string().transform((str) => new Date(str)),
   endDate: z.string().transform((str) => new Date(str)),
-  venueId: z.string(),
-  categoryId: z.string(),
-  price: z.number().positive('Price must be positive'),
+  userId: z.string().min(25, 'Invalid user ID format'),
+  venueId: z.string().min(25, 'Invalid venue ID format'),
+  categoryId: z.string().min(25, 'Invalid category ID format'),
+  price: z
+    .string()
+    .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
+      message: "Price must be a positive number",
+    })
+    .transform((value) => parseFloat(value)),
+  image: z.string().url('Invalid image URL'),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED']).default('DRAFT'),
 });
 
-export type EventForm = z.infer<typeof eventSchema>;
+
+export type EventFormData = z.infer<typeof eventSchema>;
